@@ -1,5 +1,5 @@
 [project]
-name = "ai-template-python"
+name = "enterprise-rag"
 version = "0.1.0"
 description = "Production-ready Python template for AI, Machine Learning and Data Science projects."
 readme = "README.md"
