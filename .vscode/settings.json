@@ -8,5 +8,6 @@
     "ruff.nativeServer": "on",
     "files.trimTrailingWhitespace": true,
     "editor.insertSpaces": true,
-    "editor.tabSize": 4
+    "editor.tabSize": 4,
+    "makefile.configureOnOpen": true
 }
