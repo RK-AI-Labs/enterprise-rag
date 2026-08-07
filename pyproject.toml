@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Production-ready Python template for AI, Machine Learning and Data Science projects."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["pydantic>=2.9", "pydantic-settings>=2.6"]
+dependencies = ["pydantic>=2.9", "pydantic-settings>=2.6", "structlog>=24.4"]
 
 authors = [{ name = "Rajesh Kanna Vaidyanathan" }]
 
