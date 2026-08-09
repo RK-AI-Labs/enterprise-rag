@@ -170,23 +170,38 @@ make lint
 make format
 make test
 make run
+make up
+make down
+make logs
 ```
 
 ---
 
 # Docker
 
-Build the image.
+The stack is defined as multiple Docker Compose services: `api` (FastAPI), `postgres`,
+`qdrant`, `ollama`, and an optional `redis` cache. Copy `.env.example` to `.env` first.
+
+Bring up the core stack (api, postgres, qdrant, ollama).
 
 ```bash
-docker build -t ai-template-python .
+docker compose up -d --build
 ```
 
-Run using Docker Compose.
+Include the optional Redis cache.
 
 ```bash
-docker compose up
+docker compose --profile cache up -d --build
 ```
+
+Tail logs or stop the stack.
+
+```bash
+docker compose logs -f
+docker compose down
+```
+
+Per-service Dockerfiles and config live under `docker/{fastapi,postgres,qdrant,ollama}/`.
 
 ---
 
