@@ -10,6 +10,9 @@ dependencies = [
     "structlog>=24.4",
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
+    "sqlalchemy[asyncio]>=2.0",
+    "asyncpg>=0.29",
+    "qdrant-client>=1.12,<1.13",
 ]
 
 authors = [{ name = "Rajesh Kanna Vaidyanathan" }]
@@ -21,8 +24,10 @@ dev = [
     "mypy>=2.1.0",
     "pre-commit>=4.6.0",
     "pytest>=9.1.1",
+    "pytest-asyncio>=0.24",
     "ruff>=0.15.20",
     "httpx>=0.27",
+    "aiosqlite>=0.20",
 ]
 
 [build-system]
@@ -48,6 +53,7 @@ quote-style = "double"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-ra"
+asyncio_mode = "auto"
 
 [tool.mypy]
 python_version = "3.13"

@@ -205,6 +205,21 @@ Per-service Dockerfiles and config live under `docker/{fastapi,postgres,qdrant,o
 
 ---
 
+# Database & Vector Store
+
+Postgres (document/metadata registry) and Qdrant (vector store) connections are fully
+configurable via `Settings` (`src/app/config/settings.py`) — see `POSTGRES_*`/`QDRANT_*` in
+`.env.example`. `POSTGRES_HOST`/`QDRANT_HOST` default to `localhost` for host-side development
+against the ports published by `docker-compose.yml`; the `api` container overrides them to the
+`postgres`/`qdrant` service names so it can resolve them on the Compose network.
+
+* `app/database/` — async SQLAlchemy engine, session factory, and ORM models.
+* `app/vectorstore/` — async Qdrant client factory and collection management helpers.
+* `app/repositories/` — repository interfaces plus Postgres/Qdrant implementations, used by
+  `services/` in later phases without depending on infrastructure clients directly.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:

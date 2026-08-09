@@ -1,0 +1,19 @@
+"""FastAPI-friendly async database session dependency."""
+
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.engine import get_session_factory
+
+
+async def get_session() -> AsyncGenerator[AsyncSession]:
+    """Yield a transactional async session: commits on success, rolls back on error."""
+    session_factory = get_session_factory()
+    async with session_factory() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
