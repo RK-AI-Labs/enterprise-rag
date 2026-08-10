@@ -38,14 +38,19 @@ class Settings(BaseSettings):
 
     ollama_host: str = "localhost"
     ollama_port: int = Field(default=11434, ge=1, le=65535)
+    ollama_model: str = "qwen3"
 
     embedding_provider: Literal["ollama", "openai"] = "ollama"
     embedding_model: str = "nomic-embed-text"
     embedding_batch_size: int = Field(default=32, ge=1)
 
+    llm_provider: Literal["ollama", "openai"] = "ollama"
+    llm_temperature: float = Field(default=0.0, ge=0.0, le=2.0)
+
     openai_api_key: str | None = None
     openai_base_url: str = "https://api.openai.com/v1"
     openai_embedding_model: str = "text-embedding-3-small"
+    openai_llm_model: str = "gpt-4o-mini"
 
     retrieval_top_k: int = Field(default=5, ge=1)
     retrieval_dense_weight: float = Field(default=0.5, ge=0.0, le=1.0)
@@ -76,6 +81,11 @@ class Settings(BaseSettings):
     def ollama_base_url(self) -> str:
         """HTTP base URL for the Ollama server."""
         return f"http://{self.ollama_host}:{self.ollama_port}"
+
+    @property
+    def ollama_openai_base_url(self) -> str:
+        """HTTP base URL for Ollama's OpenAI-compatible chat completions API."""
+        return f"{self.ollama_base_url}/v1"
 
 
 @lru_cache

@@ -24,12 +24,16 @@ def test_settings_defaults() -> None:
     assert settings.chunk_overlap == 200
     assert settings.ollama_host == "localhost"
     assert settings.ollama_port == 11434
+    assert settings.ollama_model == "qwen3"
     assert settings.embedding_provider == "ollama"
     assert settings.embedding_model == "nomic-embed-text"
     assert settings.embedding_batch_size == 32
+    assert settings.llm_provider == "ollama"
+    assert settings.llm_temperature == 0.0
     assert settings.openai_api_key is None
     assert settings.openai_base_url == "https://api.openai.com/v1"
     assert settings.openai_embedding_model == "text-embedding-3-small"
+    assert settings.openai_llm_model == "gpt-4o-mini"
     assert settings.retrieval_top_k == 5
     assert settings.retrieval_dense_weight == 0.5
     assert settings.bm25_k1 == 1.5
@@ -57,6 +61,13 @@ def test_settings_ollama_base_url() -> None:
     settings = Settings(_env_file=None)  # type: ignore[call-arg]
 
     assert settings.ollama_base_url == "http://localhost:11434"
+
+
+def test_settings_ollama_openai_base_url() -> None:
+    """`ollama_openai_base_url` should append `/v1` to the Ollama base URL."""
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+
+    assert settings.ollama_openai_base_url == "http://localhost:11434/v1"
 
 
 def test_settings_rejects_chunk_overlap_gte_chunk_size() -> None:

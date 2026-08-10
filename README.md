@@ -284,6 +284,21 @@ router → (retriever | tool) → response, with the router branch selected via 
 
 ---
 
+# LLM Integration
+
+`app/llm/` defines an `LlmClient` protocol and `OpenAiCompatibleLlmClient`, a single
+implementation that posts chat messages to any OpenAI-compatible `/chat/completions` endpoint —
+Ollama's OpenAI-compatible API and OpenAI's own API share the same wire format, so only
+`base_url`/`model`/`api_key` differ between backends. `get_llm_client()`
+(`app/llm/factory.py`) selects and configures the client from `Settings` based on `LLM_PROVIDER`
+(`ollama` or `openai`) — see the LLM section of `.env.example` for all configurable settings.
+
+`app/prompts/` externalizes prompt text as `.txt` templates (`system`, `retriever`, `answer`,
+`critique`, `evaluation`) under `app/prompts/templates/`, loaded via `load_prompt(name)`
+(`app/prompts/loader.py`), so prompt copy never lives inline in application code.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:

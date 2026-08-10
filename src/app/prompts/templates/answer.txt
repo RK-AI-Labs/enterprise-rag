@@ -1,0 +1,8 @@
+Answer the question using only the context below. Cite the chunk ID for every claim you make.
+If the context is insufficient to answer, respond with exactly: "I don't have enough
+information to answer that."
+
+Context:
+{context}
+
+Question: {question}

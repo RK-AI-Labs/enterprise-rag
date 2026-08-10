@@ -1,0 +1,9 @@
+Review the draft answer below against the supplied context. Identify any claims that are not
+directly supported by the context, and rewrite the answer to remove or correct them. Keep
+supported claims and their chunk-ID citations unchanged.
+
+Context:
+{context}
+
+Draft answer:
+{answer}
