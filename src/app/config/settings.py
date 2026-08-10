@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,6 +32,16 @@ class Settings(BaseSettings):
     qdrant_host: str = "localhost"
     qdrant_port: int = Field(default=6333, ge=1, le=65535)
     qdrant_grpc_port: int = Field(default=6334, ge=1, le=65535)
+
+    chunk_size: int = Field(default=1000, ge=1)
+    chunk_overlap: int = Field(default=200, ge=0)
+
+    @model_validator(mode="after")
+    def _validate_chunk_overlap(self) -> "Settings":
+        """Ensure chunk overlap never exceeds or equals the chunk size."""
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError("chunk_overlap must be smaller than chunk_size")
+        return self
 
     @property
     def postgres_dsn(self) -> str:

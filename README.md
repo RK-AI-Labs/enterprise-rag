@@ -220,6 +220,20 @@ against the ports published by `docker-compose.yml`; the `api` container overrid
 
 ---
 
+# Document Ingestion
+
+`app/ingestion/` loads PDF, DOCX, TXT, Markdown, CSV, Excel, and PowerPoint files into raw text
+via a `DocumentLoader` protocol, dispatched by file extension (`app/ingestion/registry.py`).
+Loaders use PyMuPDF, python-docx, openpyxl, and python-pptx directly for a lean, purpose-built
+dependency footprint. An `OcrProvider` interface is defined in `app/ingestion/ocr.py` for future
+scanned-document support but is not implemented in the MVP.
+
+`app/parsing/chunker.py` splits loaded documents into overlapping text chunks, tagged with
+document ID, source filename, page number, and content type. Chunk size/overlap are configurable
+via `CHUNK_SIZE`/`CHUNK_OVERLAP` in `.env.example`.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:

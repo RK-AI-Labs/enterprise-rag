@@ -1,5 +1,8 @@
 """Unit tests for application settings."""
 
+import pytest
+from pydantic import ValidationError
+
 from app.config.settings import Settings, get_settings
 
 
@@ -17,6 +20,8 @@ def test_settings_defaults() -> None:
     assert settings.postgres_port == 5432
     assert settings.qdrant_host == "localhost"
     assert settings.qdrant_port == 6333
+    assert settings.chunk_size == 1000
+    assert settings.chunk_overlap == 200
 
 
 def test_settings_postgres_dsn() -> None:
@@ -33,6 +38,12 @@ def test_settings_qdrant_url() -> None:
     settings = Settings(_env_file=None)  # type: ignore[call-arg]
 
     assert settings.qdrant_url == "http://localhost:6333"
+
+
+def test_settings_rejects_chunk_overlap_gte_chunk_size() -> None:
+    """Settings should reject a chunk_overlap that is not smaller than chunk_size."""
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, chunk_size=100, chunk_overlap=100)  # type: ignore[call-arg]
 
 
 def test_settings_env_override(monkeypatch) -> None:
