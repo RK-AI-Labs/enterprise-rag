@@ -11,6 +11,7 @@ services:
     environment:
       POSTGRES_HOST: postgres
       QDRANT_HOST: qdrant
+      OLLAMA_HOST: ollama
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:

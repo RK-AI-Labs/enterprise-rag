@@ -234,6 +234,18 @@ via `CHUNK_SIZE`/`CHUNK_OVERLAP` in `.env.example`.
 
 ---
 
+# Embedding Pipeline
+
+`app/embedding/` defines an `EmbeddingProvider` protocol implemented by `OllamaEmbeddingProvider`
+(default, targets a local/remote Ollama server's `/api/embed` endpoint) and
+`OpenAiEmbeddingProvider` (targets any OpenAI-compatible `/embeddings` endpoint). Both batch
+requests (`EMBEDDING_BATCH_SIZE`) and are fully async. `get_embedding_provider()`
+(`app/embedding/factory.py`) selects and configures the provider from `Settings` based on
+`EMBEDDING_PROVIDER` (`ollama` or `openai`) — see the Embedding section of `.env.example` for all
+configurable settings.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:

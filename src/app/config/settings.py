@@ -36,6 +36,17 @@ class Settings(BaseSettings):
     chunk_size: int = Field(default=1000, ge=1)
     chunk_overlap: int = Field(default=200, ge=0)
 
+    ollama_host: str = "localhost"
+    ollama_port: int = Field(default=11434, ge=1, le=65535)
+
+    embedding_provider: Literal["ollama", "openai"] = "ollama"
+    embedding_model: str = "nomic-embed-text"
+    embedding_batch_size: int = Field(default=32, ge=1)
+
+    openai_api_key: str | None = None
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_embedding_model: str = "text-embedding-3-small"
+
     @model_validator(mode="after")
     def _validate_chunk_overlap(self) -> "Settings":
         """Ensure chunk overlap never exceeds or equals the chunk size."""
@@ -55,6 +66,11 @@ class Settings(BaseSettings):
     def qdrant_url(self) -> str:
         """HTTP URL for the Qdrant vector store."""
         return f"http://{self.qdrant_host}:{self.qdrant_port}"
+
+    @property
+    def ollama_base_url(self) -> str:
+        """HTTP base URL for the Ollama server."""
+        return f"http://{self.ollama_host}:{self.ollama_port}"
 
 
 @lru_cache
