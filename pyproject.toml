@@ -19,6 +19,7 @@ dependencies = [
     "python-pptx>=1.0",
     "httpx>=0.27",
     "langgraph>=1.2.10",
+    "chainlit>=2.11.1",
 ]
 
 authors = [{ name = "Rajesh Kanna Vaidyanathan" }]
@@ -66,3 +67,4 @@ python_version = "3.13"
 warn_unused_configs = true
 warn_return_any = true
 check_untyped_defs = true
+exclude = ["^chainlit/"]

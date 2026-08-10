@@ -3,6 +3,9 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Chainlit (auto-generated local config, regenerated on first `chainlit run`)
+.chainlit/
+
 # C extensions
 *.so
 

@@ -299,6 +299,40 @@ Ollama's OpenAI-compatible API and OpenAI's own API share the same wire format, 
 
 ---
 
+# Chainlit UI
+
+The top-level `chainlit/main.py` is a working chat UI wiring together retrieval, the LLM, and the
+LangGraph agent graph:
+
+* **Chat** — each session builds a `DenseRetriever` (embedding provider + `QdrantVectorRepository`),
+  an `LlmResponseGenerator` (`app/llm/response_generator.py` — a concrete `ResponseGenerator`
+  combining `LlmClient` and the externalized prompt templates), and `NotImplementedToolExecutor`
+  into a compiled graph via `build_graph()`. Messages are answered by invoking the graph;
+  tool-routed queries surface a friendly "not supported yet" message instead of crashing.
+* **Document upload** — files attached to a chat message are ingested via `ingest_document()`
+  (`app/ingestion/pipeline.py`): load → chunk → embed → persist (Postgres document registry +
+  Qdrant vectors), reusing the Phase 6/7 ingestion and embedding pipelines.
+* **Citations** — retrieved chunks are attached to each answer as `cl.Text` side-panel elements,
+  labeled with their chunk ID and source.
+* **Streaming** — answers are rendered progressively via `stream_token()`. This simulates
+  streaming by chunking the completed answer text; `LlmClient.generate()` returns a single
+  completed string rather than a true token stream, so real token-level streaming is future work.
+* **Scope note** — retrieval is dense-only (no BM25/hybrid fusion), since combining it with a
+  live Chainlit session would need a reusable corpus-loading/indexing service that doesn't exist
+  yet; this is a deliberate simplification, not a regression.
+
+## Running the Chainlit UI
+
+With the `postgres`, `qdrant`, and `ollama` services up (`make up` or `docker compose up -d`):
+
+```bash
+uv run chainlit run chainlit/main.py -w
+```
+
+Open the printed local URL, ask a question, or attach a document to add it to the knowledge base.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:

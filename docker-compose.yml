@@ -91,6 +91,29 @@ services:
     networks:
       - enterprise-rag-net
 
+  chainlit:
+    build:
+      context: .
+      dockerfile: docker/chainlit/Dockerfile
+    container_name: enterprise-rag-chainlit
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      QDRANT_HOST: qdrant
+      OLLAMA_HOST: ollama
+    ports:
+      - "${CHAINLIT_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - enterprise-rag-net
+
   redis:
     image: redis:7-alpine
     container_name: enterprise-rag-redis

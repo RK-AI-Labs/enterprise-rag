@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     qdrant_host: str = "localhost"
     qdrant_port: int = Field(default=6333, ge=1, le=65535)
     qdrant_grpc_port: int = Field(default=6334, ge=1, le=65535)
+    qdrant_collection: str = "documents"
 
     chunk_size: int = Field(default=1000, ge=1)
     chunk_overlap: int = Field(default=200, ge=0)
