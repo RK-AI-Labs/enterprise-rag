@@ -262,6 +262,28 @@ configurable settings.
 
 ---
 
+# Agentic Orchestration
+
+`app/agents/` and `app/graph/` implement the query-answering flow as a LangGraph `StateGraph`
+over a shared `GraphState`:
+
+* `query_understanding_node` — normalizes the raw query (whitespace stripping); a placeholder for
+  future LLM-based query rewriting.
+* `router_node` — routes to retrieval or a tool using a deterministic `"tool:"`/`"calc:"` prefix
+  heuristic; a placeholder for a future LLM-based classifier.
+* `build_retriever_node()` — wraps any `Retriever` (e.g. `HybridRetriever`) to fetch candidate
+  chunks for the (rewritten) query.
+* `build_tool_node()` — wraps a `ToolExecutor`; `NotImplementedToolExecutor` is the MVP default
+  since no concrete SQL/Web/KG tool is required yet.
+* `build_response_node()` — wraps a `ResponseGenerator` to synthesize the final answer from
+  retrieved chunks (or the tool result, wrapped as a chunk); `NotImplementedResponseGenerator` is
+  the MVP default pending Phase 10's LLM integration.
+
+`app/graph/build.py`'s `build_graph()` wires these into a compiled graph: query understanding →
+router → (retriever | tool) → response, with the router branch selected via a conditional edge.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:
