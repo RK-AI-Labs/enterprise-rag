@@ -38,6 +38,7 @@ class QdrantVectorRepository:
                 id=str(point.id),
                 vector=cast("list[float]", point.vector) if point.vector else [],
                 payload=point.payload or {},
+                score=point.score,
             )
             for point in response.points
         ]

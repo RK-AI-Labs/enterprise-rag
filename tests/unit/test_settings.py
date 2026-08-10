@@ -30,6 +30,10 @@ def test_settings_defaults() -> None:
     assert settings.openai_api_key is None
     assert settings.openai_base_url == "https://api.openai.com/v1"
     assert settings.openai_embedding_model == "text-embedding-3-small"
+    assert settings.retrieval_top_k == 5
+    assert settings.retrieval_dense_weight == 0.5
+    assert settings.bm25_k1 == 1.5
+    assert settings.bm25_b == 0.75
 
 
 def test_settings_postgres_dsn() -> None:

@@ -9,3 +9,4 @@ class VectorPoint(BaseModel):
     id: str
     vector: list[float]
     payload: dict[str, object] = Field(default_factory=dict)
+    score: float | None = None

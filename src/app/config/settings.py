@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     openai_base_url: str = "https://api.openai.com/v1"
     openai_embedding_model: str = "text-embedding-3-small"
 
+    retrieval_top_k: int = Field(default=5, ge=1)
+    retrieval_dense_weight: float = Field(default=0.5, ge=0.0, le=1.0)
+    bm25_k1: float = Field(default=1.5, gt=0.0)
+    bm25_b: float = Field(default=0.75, ge=0.0, le=1.0)
+
     @model_validator(mode="after")
     def _validate_chunk_overlap(self) -> "Settings":
         """Ensure chunk overlap never exceeds or equals the chunk size."""

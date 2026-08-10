@@ -34,6 +34,7 @@ async def test_upsert_and_search_returns_matching_point(client: AsyncQdrantClien
     assert results[0].id == POINT_ID
     assert results[0].payload == {"source": "a.pdf"}
     assert len(results[0].vector) == 3
+    assert results[0].score is not None
 
 
 async def test_delete_removes_point(client: AsyncQdrantClient) -> None:

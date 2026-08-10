@@ -246,6 +246,22 @@ configurable settings.
 
 ---
 
+# Hybrid Retrieval
+
+`app/retrieval/` combines sparse and dense retrieval behind narrow protocol interfaces:
+
+* `bm25/` — an in-memory Okapi BM25 retriever (`BM25Retriever`) over a corpus of `Chunk`s;
+  `BM25_K1`/`BM25_B` tune term-frequency saturation and length normalization.
+* `dense/` — `DenseRetriever` embeds the query via an `EmbeddingProvider` and searches
+  `VectorRepository`, which now surfaces Qdrant's similarity `score` on `VectorPoint`.
+* `hybrid/` — `fuse_scores()` combines BM25 and dense results via min-max normalized, weighted
+  score fusion (`RETRIEVAL_DENSE_WEIGHT`, 0 = BM25-only, 1 = dense-only); `HybridRetriever`
+  queries both sides and returns the top `RETRIEVAL_TOP_K` fused results.
+* `reranker/` — a `Reranker` protocol with a `NotImplementedReranker` stub; a concrete
+  cross-encoder/Cohere/BGE reranker is deferred to future work.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:
