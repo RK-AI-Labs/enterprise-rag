@@ -77,6 +77,7 @@ services:
     entrypoint: ["/entrypoint.sh"]
     environment:
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text}
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
     volumes:
