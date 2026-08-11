@@ -36,3 +36,12 @@ def test_get_llm_client_requires_openai_api_key() -> None:
 
     with pytest.raises(ValidationError):
         get_llm_client(settings)
+
+
+def test_get_llm_client_rejects_unsupported_provider() -> None:
+    """An unrecognized `llm_provider` value should raise `ValidationError`."""
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.llm_provider = "bogus"  # type: ignore[assignment]
+
+    with pytest.raises(ValidationError):
+        get_llm_client(settings)

@@ -142,6 +142,12 @@ Run tests.
 uv run pytest
 ```
 
+Run tests with a coverage report (gated at 80% minimum via `pyproject.toml`).
+
+```bash
+uv run pytest --cov=app --cov-report=term-missing
+```
+
 Lint the project.
 
 ```bash

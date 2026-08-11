@@ -2,7 +2,12 @@
 
 from app.models.citation import Citation
 from app.models.retrieval import RetrievedChunk
-from app.services.grounding import FALLBACK_ANSWER, extract_citations, ground_answer
+from app.services.grounding import (
+    FALLBACK_ANSWER,
+    compute_confidence,
+    extract_citations,
+    ground_answer,
+)
 
 _CHUNK_A = RetrievedChunk(chunk_id="a", content="chunk a", score=0.9, source="doc-a")
 _CHUNK_B = RetrievedChunk(chunk_id="b", content="chunk b", score=0.5, source="doc-b")
@@ -63,3 +68,8 @@ def test_ground_answer_passes_through_explicit_fallback_unchanged() -> None:
     assert grounded.answer == FALLBACK_ANSWER
     assert grounded.citations == []
     assert grounded.confidence == 0.0
+
+
+def test_compute_confidence_returns_zero_for_no_citations() -> None:
+    """With no citations, confidence should be exactly 0.0."""
+    assert compute_confidence([]) == 0.0

@@ -35,6 +35,7 @@ dev = [
     "ruff>=0.15.20",
     "aiosqlite>=0.20",
     "types-openpyxl>=3.1",
+    "pytest-cov>=7.1.0",
 ]
 
 [build-system]
@@ -68,3 +69,11 @@ warn_unused_configs = true
 warn_return_any = true
 check_untyped_defs = true
 exclude = ["^chainlit/"]
+
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]

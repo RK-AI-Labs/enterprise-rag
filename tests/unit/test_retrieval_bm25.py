@@ -52,6 +52,17 @@ def test_search_excludes_chunks_with_no_matching_terms() -> None:
     assert results[0].chunk_id == f"{DOC_ID}:0"
 
 
+def test_search_ignores_query_terms_absent_from_the_corpus() -> None:
+    """A query term that never appears in any indexed chunk should be skipped, not error."""
+    retriever = BM25Retriever()
+    retriever.index([_chunk(0, "apples and oranges")])
+
+    results = retriever.search("apples zzznotaword", limit=5)
+
+    assert len(results) == 1
+    assert results[0].chunk_id == f"{DOC_ID}:0"
+
+
 def test_search_respects_limit() -> None:
     """No more than `limit` results should be returned."""
     retriever = BM25Retriever()

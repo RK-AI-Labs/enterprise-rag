@@ -37,3 +37,12 @@ def test_get_embedding_provider_requires_openai_api_key() -> None:
 
     with pytest.raises(ValidationError):
         get_embedding_provider(settings)
+
+
+def test_get_embedding_provider_rejects_unsupported_provider() -> None:
+    """An unrecognized `embedding_provider` value should raise `ValidationError`."""
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.embedding_provider = "bogus"  # type: ignore[assignment]
+
+    with pytest.raises(ValidationError):
+        get_embedding_provider(settings)
