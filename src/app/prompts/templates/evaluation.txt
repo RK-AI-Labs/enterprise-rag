@@ -1,0 +1,11 @@
+Given the question, the retrieved context, and the generated answer, rate the answer on two
+dimensions from 1 (poor) to 5 (excellent): faithfulness to the context, and relevance to the
+question. Provide a one-sentence justification for each rating.
+
+Question: {question}
+
+Context:
+{context}
+
+Answer:
+{answer}

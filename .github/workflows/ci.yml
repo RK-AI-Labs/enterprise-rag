@@ -5,7 +5,7 @@ on:
     branches: [main, develop]
 
   pull_request:
-    branches: [main]
+    branches: [main, feature/enterprise-rag-v1]
 
 jobs:
   test:
@@ -35,5 +35,22 @@ jobs:
       - name: Check Formatting
         run: uv run ruff format --check .
 
+      - name: Run MyPy
+        run: uv run mypy .
+
       - name: Run Tests
-        run: uv run pytest
+        run: uv run pytest --cov=app --cov-report=term-missing
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build API Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/fastapi/Dockerfile
+          push: false

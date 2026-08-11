@@ -1,6 +1,143 @@
+name: enterprise-rag
+
 services:
-  app:
-    build: .
-    container_name: ai-template-python
+  api:
+    build:
+      context: .
+      dockerfile: docker/fastapi/Dockerfile
+    container_name: enterprise-rag-api
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      QDRANT_HOST: qdrant
+      OLLAMA_HOST: ollama
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - enterprise-rag-net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: enterprise-rag-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-enterprise_rag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-enterprise_rag}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - .:/app
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-enterprise_rag}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - enterprise-rag-net
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: enterprise-rag-qdrant
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - enterprise-rag-net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: enterprise-rag-ollama
+    entrypoint: ["/entrypoint.sh"]
+    environment:
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text}
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./docker/ollama/entrypoint.sh:/entrypoint.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/11434' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - enterprise-rag-net
+
+  chainlit:
+    build:
+      context: .
+      dockerfile: docker/chainlit/Dockerfile
+    container_name: enterprise-rag-chainlit
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      QDRANT_HOST: qdrant
+      OLLAMA_HOST: ollama
+    ports:
+      - "${CHAINLIT_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - enterprise-rag-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: enterprise-rag-redis
+    profiles:
+      - cache
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - enterprise-rag-net
+
+networks:
+  enterprise-rag-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  ollama_data:
+  redis_data:

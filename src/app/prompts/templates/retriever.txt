@@ -1,0 +1,5 @@
+Rewrite the user's question into a concise, self-contained search query suitable for a
+retrieval system. Preserve all named entities and technical terms. Return only the rewritten
+query, with no additional commentary.
+
+Question: {question}
