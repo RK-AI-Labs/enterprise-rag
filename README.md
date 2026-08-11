@@ -1,64 +1,65 @@
-# AI Template Python
+# Enterprise RAG
 
-> A modern, production-ready Python template for AI, Machine Learning, Data Science, and backend engineering projects.
+> A production-grade Retrieval-Augmented Generation platform: hybrid retrieval, LangGraph
+> agentic orchestration, grounded/cited answers, and a Chainlit chat UI — built on FastAPI,
+> Postgres, Qdrant, and Ollama.
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue.svg)
 ![uv](https://img.shields.io/badge/Package%20Manager-uv-blueviolet)
 ![Ruff](https://img.shields.io/badge/Linter-Ruff-orange)
 ![Pytest](https://img.shields.io/badge/Testing-pytest-green)
+![Coverage](https://img.shields.io/badge/Coverage-96%25-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
 ## Overview
 
-This repository provides a clean, reusable foundation for modern Python development.
+Enterprise RAG is an end-to-end Retrieval-Augmented Generation system, built as a portfolio
+demonstration of production AI engineering practices rather than a notebook prototype:
 
-It is designed to be the starting point for:
+* **Hybrid retrieval** — BM25 (sparse) + dense vector search (Qdrant), combined via weighted
+  score fusion, behind a pluggable reranker interface.
+* **Agentic orchestration** — a LangGraph `StateGraph` routes each query through query
+  understanding, retrieval-or-tool routing, and response generation nodes.
+* **Grounded, cited answers** — every retrieval-backed answer is verified against the chunks it
+  cites; ungrounded claims are replaced with an explicit "I don't have enough information"
+  fallback rather than surfaced as fact.
+* **Multi-format ingestion** — PDF, DOCX, TXT, Markdown, CSV, XLSX, and PPTX documents are
+  loaded, chunked with page/source metadata, embedded, and persisted (Postgres + Qdrant).
+* **Chainlit UI** — a working chat front end with streaming, document upload, and citation
+  side-panels, backed by the same graph used by the API.
+* **Production discipline** — typed configuration (Pydantic Settings), structured logging with
+  correlation IDs, layered/hexagonal architecture, 96%+ test coverage, and a CI pipeline
+  (lint, type-check, test, Docker build) on every PR.
 
-* AI & Generative AI applications
-* Machine Learning projects
-* Data Science projects
-* FastAPI services
-* LangGraph workflows
-* RAG applications
-* Automation scripts
-* Research projects
-
-Instead of repeatedly configuring development tools for every new project, this template provides a standardized engineering foundation.
-
----
-
-# Features
-
-* Python 3.13+
-* uv package & dependency management
-* Ruff linting and formatting
-* pytest testing
-* pre-commit hooks
-* Docker support
-* Dev Container support
-* GitHub Actions CI
-* VS Code configuration
-* WSL2 optimized
-* Modern `src` project layout
+See [docs/diagrams/architecture.md](docs/diagrams/architecture.md) for the component architecture
+and [docs/diagrams/sequence.md](docs/diagrams/sequence.md) for request-flow and agentic-graph
+diagrams.
 
 ---
 
 # Technology Stack
 
-| Category        | Tool        |
-| --------------- | ----------- |
-| Language        | Python 3.13 |
-| Package Manager | uv          |
-| Formatter       | Ruff        |
-| Linter          | Ruff        |
-| Testing         | pytest      |
-| Type Checking   | mypy        |
-| Git Hooks       | pre-commit  |
-| Containers      | Docker      |
-| IDE             | VS Code     |
-| Development     | WSL2 Ubuntu |
+| Category            | Tool                        |
+| ------------------- | --------------------------- |
+| Language            | Python 3.13                 |
+| Package Manager     | uv                          |
+| API Framework       | FastAPI                     |
+| Agent Orchestration | LangGraph                   |
+| Chat UI             | Chainlit                    |
+| LLM / Embeddings    | Ollama (Qwen3, nomic-embed) — OpenAI-compatible |
+| Vector Store        | Qdrant                      |
+| Metadata Store      | PostgreSQL (async SQLAlchemy) |
+| Retrieval           | BM25 (in-memory) + dense (Qdrant), weighted fusion |
+| Config              | Pydantic Settings           |
+| Logging             | structlog (structured, correlation IDs) |
+| Formatter / Linter  | Ruff                        |
+| Type Checking       | mypy                        |
+| Testing             | pytest, pytest-cov          |
+| Git Hooks           | pre-commit                  |
+| Containers          | Docker / Docker Compose     |
+| CI                  | GitHub Actions              |
 
 ---
 
@@ -66,26 +67,29 @@ Instead of repeatedly configuring development tools for every new project, this 
 
 ```text
 .
-├── .devcontainer/
-├── .github/
-│   ├── workflows/
-│   └── ISSUE_TEMPLATE/
-├── .vscode/
-├── assets/
-├── configs/
-├── data/
-│   ├── external/
-│   ├── processed/
-│   └── raw/
+├── .github/workflows/ci.yml   # lint, type-check, test+coverage, Docker build
+├── chainlit/                  # Chainlit chat UI (main.py)
+├── docker/                    # per-service Dockerfiles (fastapi, chainlit, postgres, qdrant, ollama)
 ├── docs/
-├── examples/
-├── models/
-├── notebooks/
-├── scripts/
-├── src/
-│   └── ai_template_python/
+│   ├── diagrams/              # architecture & sequence diagrams (Mermaid)
+│   ├── setup.md
+│   ├── developer-guide.md
+│   ├── deployment.md
+│   └── troubleshooting.md
+├── src/app/
+│   ├── agents/ graph/         # LangGraph nodes + graph assembly
+│   ├── api/                   # FastAPI routes, middleware, exception handling
+│   ├── config/                # Pydantic Settings
+│   ├── database/ vectorstore/ repositories/  # Postgres + Qdrant persistence layer
+│   ├── embedding/ llm/ prompts/               # provider abstractions + externalized prompts
+│   ├── ingestion/ parsing/    # document loaders + chunking
+│   ├── logging/                # structlog setup + correlation ID middleware
+│   ├── models/                # domain entities (Pydantic)
+│   ├── retrieval/              # bm25/, dense/, hybrid/, reranker/
+│   └── services/               # grounding / citation verification
 ├── tests/
-├── Dockerfile
+│   ├── api/                   # FastAPI TestClient integration tests
+│   └── unit/                  # unit tests (>96% coverage)
 ├── docker-compose.yml
 ├── Makefile
 ├── pyproject.toml
@@ -99,9 +103,8 @@ Instead of repeatedly configuring development tools for every new project, this 
 * Python 3.13+
 * uv
 * Git
-* Docker (optional)
+* Docker (for Postgres/Qdrant/Ollama; optional if running those services elsewhere)
 * VS Code (recommended)
-* WSL2 Ubuntu (recommended for Windows)
 
 ---
 
@@ -111,7 +114,7 @@ Clone the repository.
 
 ```bash
 git clone <repository-url>
-cd ai-template-python
+cd enterprise-rag
 ```
 
 Install dependencies.
@@ -120,17 +123,21 @@ Install dependencies.
 uv sync
 ```
 
-Activate the virtual environment.
+Copy the environment template and fill in any secrets (e.g. `OPENAI_API_KEY` if using OpenAI).
 
 ```bash
-source .venv/bin/activate
+cp .env.example .env
 ```
 
-Run the application.
+Bring up Postgres, Qdrant, and Ollama (see [Docker](#docker) below), then run the Chainlit UI
+(see [Running the Chainlit UI](#running-the-chainlit-ui)) or the FastAPI app:
 
 ```bash
 uv run python main.py
 ```
+
+For a full walkthrough (first-run model pulls, environment variables, verifying the stack is
+healthy), see [docs/setup.md](docs/setup.md).
 
 ---
 
@@ -359,30 +366,69 @@ retrieved context) and reports full confidence with no citations.
 
 ---
 
-# Continuous Integration
+# Documentation
 
-GitHub Actions automatically:
-
-* Install Python
-* Install uv
-* Install dependencies
-* Run Ruff
-* Run pytest
-
-on every push and pull request.
+* [docs/setup.md](docs/setup.md) — first-run setup, environment variables, verifying the stack.
+* [docs/developer-guide.md](docs/developer-guide.md) — architecture conventions, adding a new
+  loader/provider/retriever, running the test suite.
+* [docs/deployment.md](docs/deployment.md) — Docker Compose deployment, configuration reference,
+  CI/CD pipeline.
+* [docs/troubleshooting.md](docs/troubleshooting.md) — real issues hit while building this
+  project and how they were diagnosed/fixed.
+* [docs/diagrams/architecture.md](docs/diagrams/architecture.md) — component architecture and
+  layering rules.
+* [docs/diagrams/sequence.md](docs/diagrams/sequence.md) — request-flow, retrieval pipeline, and
+  agentic graph diagrams.
 
 ---
 
-# Roadmap
+# Continuous Integration
 
-Future template repositories built from this foundation:
+`.github/workflows/ci.yml` runs on every push and pull request:
 
-* FastAPI Template
-* LangGraph Template
-* Enterprise RAG Template
-* Data Science Template
-* Machine Learning Template
-* Agentic AI Template
+* Install Python + uv, `uv sync`
+* `ruff check .` / `ruff format --check .`
+* `mypy .`
+* `pytest --cov=app --cov-report=term-missing` (fails below 80% coverage)
+* Docker build of `docker/fastapi/Dockerfile` (build-only, catches Dockerfile breakage pre-merge)
+
+---
+
+# Engineering Highlights
+
+| Dimension | What was built |
+|---|---|
+| Production architecture | Layered/hexagonal design (`api → agents/services → repositories → infra`), every infra dependency behind a `Protocol` interface |
+| AI engineering depth | Hybrid (BM25 + dense) retrieval with weighted fusion, LangGraph agentic orchestration, grounded/cited answers with confidence scoring |
+| Retrieval quality | Citation verification rejects invented sources; unverifiable answers fall back explicitly instead of hallucinating |
+| Observability | structlog structured logging, correlation IDs propagated end-to-end via middleware |
+| Testing | 134 tests, 96%+ coverage, gated at 80% in CI; fully hermetic (no live services required) |
+| Maintainability | Typed configuration (no magic numbers/hardcoded paths), externalized prompts, narrow interfaces per provider |
+| Developer experience | `uv`-based tooling, pre-commit hooks, Make targets, Docker Compose one-command stack |
+| MLOps / CI/CD | GitHub Actions: lint, format-check, type-check, coverage-gated tests, Docker build — on every PR |
+| Documentation | This README + [docs/](docs/) (setup, developer guide, deployment, troubleshooting, diagrams) |
+
+---
+
+# Project Phases
+
+Built incrementally, one reviewed phase at a time, each gated on lint + type-check + tests:
+
+| # | Phase | # | Phase |
+|---|-------|---|-------|
+| 1 | Repository structure & configuration | 9 | LangGraph agentic orchestration |
+| 2 | Structured logging & observability | 10 | Ollama LLM integration |
+| 3 | FastAPI application skeleton | 11 | Chainlit UI |
+| 4 | Docker Compose infrastructure | 12 | Citations & grounded answers |
+| 5 | Postgres + Qdrant integration | 13 | Comprehensive test hardening (96%+ coverage) |
+| 6 | Document ingestion pipeline | 14 | GitHub Actions CI/CD |
+| 7 | Embedding pipeline | 15 | Documentation & architecture diagrams |
+| 8 | Hybrid retrieval (BM25 + dense) | | |
+
+**Deliberately out of scope for this MVP** (see [docs/developer-guide.md](docs/developer-guide.md)
+for how to extend towards them): authentication, Redis caching, SQL/web-search/knowledge-graph
+tool agents, multi-tenancy, Kubernetes/cloud deployment, monitoring dashboards, and concrete
+reranker providers beyond the `Reranker` interface.
 
 ---
 
