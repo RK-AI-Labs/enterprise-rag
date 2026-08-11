@@ -333,6 +333,26 @@ Open the printed local URL, ask a question, or attach a document to add it to th
 
 ---
 
+# Citations & Grounded Answers
+
+`app/services/grounding.py`'s `ground_answer()` verifies every retrieval-backed answer before
+it's returned:
+
+* **Citations** — `extract_citations()` parses `[chunk_id]` markers from the answer and keeps
+  only ones matching a chunk that was actually retrieved, so a citation can never point to an
+  invented source.
+* **Confidence** — `compute_confidence()` averages the retrieval scores of the cited chunks.
+* **Fallback** — if no chunks were retrieved, or the answer cites none of them, the answer is
+  replaced with a fixed "I don't have enough information to answer that." message rather than
+  surfacing an unverifiable claim.
+
+The Response Agent node (`app/agents/response.py`) applies this to the retrieval path and
+threads the result into two new `GraphState` fields, `citations` and `confidence`
+(`app/models/citation.py`). The tool-executor path is exempt (tool output is deterministic, not
+retrieved context) and reports full confidence with no citations.
+
+---
+
 # Continuous Integration
 
 GitHub Actions automatically:

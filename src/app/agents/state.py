@@ -2,6 +2,7 @@
 
 from typing import TypedDict
 
+from app.models.citation import Citation
 from app.models.retrieval import RetrievedChunk
 
 
@@ -14,3 +15,5 @@ class GraphState(TypedDict, total=False):
     retrieved_chunks: list[RetrievedChunk]
     tool_result: str | None
     answer: str
+    citations: list[Citation]
+    confidence: float

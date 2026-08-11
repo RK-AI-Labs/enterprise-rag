@@ -8,6 +8,7 @@ from typing import Protocol
 
 from app.agents.state import GraphState
 from app.models.retrieval import RetrievedChunk
+from app.services.grounding import ground_answer
 
 
 class ResponseGenerator(Protocol):
@@ -39,15 +40,26 @@ def build_response_node(response_generator: ResponseGenerator):
     """Build the Response Agent node bound to the given response generator."""
 
     async def response_node(state: GraphState) -> GraphState:
-        """Synthesize the final answer from retrieved chunks, or the tool result if present."""
+        """Synthesize the final answer from retrieved chunks, or the tool result if present.
+
+        Tool results are deterministic (not retrieved context), so they're generated and
+        returned as-is. Retrieval-backed answers go through `ground_answer()`, which verifies
+        the answer cites chunks that were actually retrieved and falls back to a safe message
+        otherwise.
+        """
         query = state.get("rewritten_query") or state["query"]
         tool_result = state.get("tool_result")
-        chunks = (
-            [_tool_result_as_chunk(tool_result)]
-            if tool_result is not None
-            else state.get("retrieved_chunks", [])
-        )
-        answer = await response_generator.generate(query, chunks)
-        return {"answer": answer}
+        if tool_result is not None:
+            answer = await response_generator.generate(query, [_tool_result_as_chunk(tool_result)])
+            return {"answer": answer, "citations": [], "confidence": 1.0}
+
+        chunks = state.get("retrieved_chunks", [])
+        raw_answer = await response_generator.generate(query, chunks)
+        grounded = ground_answer(raw_answer, chunks)
+        return {
+            "answer": grounded.answer,
+            "citations": grounded.citations,
+            "confidence": grounded.confidence,
+        }
 
     return response_node

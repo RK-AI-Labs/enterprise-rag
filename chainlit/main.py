@@ -91,7 +91,9 @@ async def on_message(message: cl.Message) -> None:
         return
 
     answer = result.get("answer") or "I don't have an answer for that."
-    await _send_answer(answer, result.get("retrieved_chunks", []))
+    cited_ids = {citation.chunk_id for citation in result.get("citations", [])}
+    cited_chunks = [c for c in result.get("retrieved_chunks", []) if c.chunk_id in cited_ids]
+    await _send_answer(answer, cited_chunks)
 
 
 async def _ingest_upload(upload: cl.File) -> None:
@@ -125,7 +127,7 @@ async def _ingest_upload(upload: cl.File) -> None:
 
 
 async def _send_answer(answer: str, chunks: list[RetrievedChunk]) -> None:
-    """Progressively render the answer and attach citation elements for the retrieved chunks."""
+    """Progressively render the answer and attach citation elements for the cited chunks."""
     msg = cl.Message(content="", elements=_citation_elements(chunks))
     words = answer.split(" ")
     for start in range(0, len(words), _STREAM_CHUNK_WORDS):
@@ -135,7 +137,7 @@ async def _send_answer(answer: str, chunks: list[RetrievedChunk]) -> None:
 
 
 def _citation_elements(chunks: list[RetrievedChunk]) -> list[cl.Text]:
-    """Render retrieved chunks as side-panel `cl.Text` citation elements."""
+    """Render cited chunks as side-panel `cl.Text` citation elements."""
     return [
         cl.Text(name=f"[{chunk.chunk_id}] {chunk.source}", content=chunk.content, display="side")
         for chunk in chunks
