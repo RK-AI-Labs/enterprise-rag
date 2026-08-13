@@ -38,16 +38,28 @@ async def test_response_node_generates_from_retrieved_chunks_and_attaches_citati
     assert result["confidence"] == 0.8
 
 
-async def test_response_node_falls_back_when_answer_cites_no_retrieved_chunk() -> None:
-    """An uncited answer, despite retrieved chunks being available, should fall back."""
+async def test_response_node_generates_no_context_response_when_grounding_fails() -> None:
+    """An uncited retrieval answer should trigger a controlled second LLM response."""
     generator = _FakeResponseGenerator("the answer, no citation")
     node = build_response_node(generator)
 
     result = await node({"query": "raw", "retrieved_chunks": [_chunk("a")]})
 
-    assert result["answer"] == "I don't have enough information to answer that."
+    assert generator.last_chunks == []
+    assert result["answer"] == "the answer, no citation"
     assert result["citations"] == []
     assert result["confidence"] == 0.0
+
+
+async def test_response_node_returns_llm_answer_when_no_chunks_are_retrieved() -> None:
+    """No-context turns, including small talk, should surface the LLM response."""
+    generator = _FakeResponseGenerator("Hello! How can I help?")
+    node = build_response_node(generator)
+
+    result = await node({"query": "hello", "retrieved_chunks": []})
+
+    assert generator.last_chunks == []
+    assert result == {"answer": "Hello! How can I help?", "citations": [], "confidence": 0.0}
 
 
 async def test_response_node_wraps_tool_result_as_chunk_and_skips_grounding() -> None:

@@ -24,7 +24,9 @@ class LlmResponseGenerator:
 
     async def generate(self, query: str, chunks: list[RetrievedChunk]) -> str:
         """Return the LLM's answer to `query`, grounded in the supplied `chunks`."""
-        prompt = load_prompt("answer").format(context=_format_context(chunks), question=query)
+        print(f"Generating response for query: {query} with {len(chunks)} chunks")
+        prompt_name = "answer" if chunks else "no_context"
+        prompt = load_prompt(prompt_name).format(context=_format_context(chunks), question=query)
         messages: list[ChatMessage] = [
             {"role": "system", "content": load_prompt("system")},
             {"role": "user", "content": prompt},

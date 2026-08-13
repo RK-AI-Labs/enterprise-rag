@@ -59,11 +59,14 @@ def ground_answer(answer: str, chunks: list[RetrievedChunk]) -> GroundedAnswer:
     fallback message.
     """
     if answer.strip() == FALLBACK_ANSWER:
+        print("Answer is already the fallback answer; returning as grounded.")
         return GroundedAnswer(answer=FALLBACK_ANSWER, citations=[], confidence=0.0)
     if not chunks:
+        print("No chunks were retrieved; returning fallback answer.")
         return GroundedAnswer(answer=FALLBACK_ANSWER, citations=[], confidence=0.0)
     citations = extract_citations(answer, chunks)
     if not citations:
+        print("Answer cites no retrieved chunks; returning fallback answer.")
         return GroundedAnswer(answer=FALLBACK_ANSWER, citations=[], confidence=0.0)
     return GroundedAnswer(
         answer=answer, citations=citations, confidence=compute_confidence(citations)

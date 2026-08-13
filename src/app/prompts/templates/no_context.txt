@@ -1,0 +1,9 @@
+No document context was retrieved for this message.
+
+If the user is making small talk, greeting you, or asking about how to use this assistant,
+respond helpfully and concisely. For any question that requires factual knowledge or document
+content, state that you do not have enough information to answer and do not guess.
+
+Context: {context}
+
+User message: {question}
