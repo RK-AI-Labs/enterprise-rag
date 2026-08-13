@@ -8,7 +8,7 @@ from typing import Protocol
 
 from app.agents.state import GraphState
 from app.models.retrieval import RetrievedChunk
-from app.services.grounding import ground_answer
+from app.services.grounding import FALLBACK_ANSWER, ground_answer
 
 
 class ResponseGenerator(Protocol):
@@ -55,7 +55,12 @@ def build_response_node(response_generator: ResponseGenerator):
 
         chunks = state.get("retrieved_chunks", [])
         raw_answer = await response_generator.generate(query, chunks)
+        if not chunks:
+            return {"answer": raw_answer, "citations": [], "confidence": 0.0}
         grounded = ground_answer(raw_answer, chunks)
+        if grounded.answer == FALLBACK_ANSWER:
+            fallback_answer = await response_generator.generate(query, [])
+            return {"answer": fallback_answer, "citations": [], "confidence": 0.0}
         return {
             "answer": grounded.answer,
             "citations": grounded.citations,

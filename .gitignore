@@ -220,6 +220,10 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Embedding Cache
+.files/
+
+
 COPILOT_MASTER_PROMPT.md
 PROJECT_ROADMAP.md
 DEVELOPMENT_PLAN.md
