@@ -226,6 +226,44 @@ configurable via `Settings` (`src/app/config/settings.py`) — see `POSTGRES_*`/
 against the ports published by `docker-compose.yml`; the `api` container overrides them to the
 `postgres`/`qdrant` service names so it can resolve them on the Compose network.
 
+## Initialize the document registry
+
+After starting Postgres, create the `documents` table once before uploading documents:
+
+```bash
+docker compose exec postgres psql -U enterprise_rag -d enterprise_rag
+```
+
+```sql
+CREATE TABLE documents (
+    id UUID PRIMARY KEY,
+    filename TEXT NOT NULL,
+    content_type TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## View Postgres with Adminer
+
+Connect the Postgres container to the `pg-net` Docker network, then run Adminer on port 8080:
+
+```bash
+docker network connect pg-net enterprise-rag-postgres
+docker run --rm --net pg-net -p 8080:8080 adminer
+```
+
+Open `http://localhost:8080` and connect with server `enterprise-rag-postgres`, using the
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` values from `.env`.
+
+## View Qdrant collections
+
+Open the Qdrant dashboard at `http://localhost:6333/dashboard#/collections`.
+
+## Code base
+
 * `app/database/` — async SQLAlchemy engine, session factory, and ORM models.
 * `app/vectorstore/` — async Qdrant client factory and collection management helpers.
 * `app/repositories/` — repository interfaces plus Postgres/Qdrant implementations, used by
